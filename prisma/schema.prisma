@@ -1,0 +1,135 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String       @id @default(cuid())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  username       String       @unique
+  email          String       @unique
+  password       String
+  recipes        Recipe[]
+  savedRecipes   Recipe[]     @relation("UserSavedRecipes")
+  comments       Comment[]
+  ratings        Rating[]
+  following      User[]       @relation("UserFollows")
+  followers      User[]       @relation("UserFollows")
+  notifications  Notification[]
+}
+
+model Recipe {
+  id             String       @id @default(cuid())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  title          String
+  description    String
+  ingredients    String
+  instructions   String
+  imageUrl       String?
+  userId         String
+  user           User         @relation(fields: [userId], references: [id])
+  ratings        Rating[]
+  comments       Comment[]
+  savedByUsers   User[]       @relation("UserSavedRecipes")
+  tags           Tag[]        @relation("RecipeTags")
+  categoryId     String?
+  category       Category?    @relation(fields: [categoryId], references: [id])
+  cuisine        Cuisine
+  mealType       MealType
+  RecipeDietaryRestriction RecipeDietaryRestriction[]
+}
+
+
+
+model Rating {
+  id             String       @id @default(cuid())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  rating        Int
+  comment       String?
+  userId        String
+  recipeId      String
+  user          User         @relation(fields: [userId], references: [id])
+  recipe        Recipe       @relation(fields: [recipeId], references: [id])
+}
+
+model Comment {
+  id             String       @id @default(cuid())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  content       String
+  userId        String
+  recipeId      String
+  user          User         @relation(fields: [userId], references: [id])
+  recipe        Recipe       @relation(fields: [recipeId], references: [id])
+}
+
+model Tag {
+  id             String       @id @default(cuid())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  name          String        @unique
+  recipes       Recipe[]      @relation("RecipeTags")
+}
+
+model Category {
+  id             String       @id @default(cuid())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  name          String        @unique
+  recipes       Recipe[]
+}
+
+enum Cuisine {
+  ITALIAN
+  CHINESE
+  INDIAN
+  MEXICAN
+  FRENCH
+  AMERICAN
+}
+
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
+}
+
+enum DietaryRestriction {
+  VEGETARIAN
+  VEGAN
+  GLUTEN_FREE
+  DAIRY_FREE
+  NUT_FREE
+}
+
+model RecipeDietaryRestriction {
+  id                 String               @id @default(cuid())
+  recipeId           String
+  dietaryRestriction DietaryRestriction
+  recipe             Recipe @relation(fields: [recipeId], references: [id])
+}
+
+
+model Notification {
+  id             String       @id @default(cuid())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  message       String
+  userId        String
+  read          Boolean       @default(false)
+  user          User         @relation(fields: [userId], references: [id])
+}
