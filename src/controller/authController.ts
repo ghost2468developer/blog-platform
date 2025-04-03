@@ -5,7 +5,7 @@ import prisma from '../prisma/client'
 const JWT_SECRET = process.env.JWT_SECRET || 'secret'
 
 // Sign Up
-export const signup = async (req, res) => {
+export const signup = async (req: { body: { username: any; email: any; password: any } }, res: { status: (arg0: number) => { (): any; new(): any; json: { (arg0: { message?: string; token?: string }): void; new(): any } } }) => {
   const { username, email, password } = req.body
 
   try {
@@ -39,7 +39,7 @@ export const signup = async (req, res) => {
 }
 
 // Login
-export const login = async (req, res) => {
+export const login = async (req: { body: { email: any; password: any } }, res: { status: (arg0: number) => { (): any; new(): any; json: { (arg0: { message?: string; token?: string }): void; new(): any } } }) => {
   const { email, password } = req.body
 
   try {
